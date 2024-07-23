@@ -1,0 +1,27 @@
+{
+  "name": "kfetch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky && husky install",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "lint-staged": "lint-staged",
+    "eslint": "eslint src/**",
+    "lint": "pnpm run eslint & pnpm run type-check"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "8.57.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.7"
+  },
+  "dependencies": {
+    "husky": "^9.1.1"
+  }
+}
