@@ -53,14 +53,58 @@ class EasyFetch {
       fetchURL = request;
       requestConfig = requestInit;
     }
-    return this.#request(fetchURL, requestConfig) as T; // DUMMY
+    return this.#request<T>(fetchURL, requestConfig);
   }
 
-  async #request(
+  #combineDefaultOptions(
     fetchURL: string | URL,
     requestConfig: RequestInit | RequestInitWithNextConfig | undefined
-  ) {
-    return '1';
+  ): [string | URL, RequestInit | RequestInitWithNextConfig | undefined] {
+    let combinedDefaultUrl: string | URL | undefined;
+    let combinedDefaultHeaders:
+      | RequestInit
+      | RequestInitWithNextConfig
+      | undefined;
+
+    if (this.#baseUrl) {
+      combinedDefaultUrl = new URL(this.#baseUrl, fetchURL);
+    }
+
+    if (this.#headers) {
+      const defaultHeaders = new Headers(this.#headers);
+
+      for (const [key, value] of new Headers(
+        requestConfig?.headers
+      ).entries()) {
+        defaultHeaders.set(key, value);
+      }
+
+      combinedDefaultHeaders = {
+        ...requestConfig,
+        headers: defaultHeaders,
+      };
+    }
+
+    return [
+      combinedDefaultUrl ?? fetchURL,
+      combinedDefaultHeaders ?? requestConfig,
+    ];
+  }
+
+  async #request<T>(
+    fetchURL: string | URL,
+    requestConfig?: RequestInit | RequestInitWithNextConfig
+  ): Promise<T> {
+    const globalFetch = fetch;
+    const combinedDefaultOptionWithFetchArgs = this.#combineDefaultOptions(
+      fetchURL,
+      requestConfig
+    );
+
+    return globalFetch(
+      combinedDefaultOptionWithFetchArgs[0],
+      combinedDefaultOptionWithFetchArgs[1]
+    ) as T;
   }
 }
 
