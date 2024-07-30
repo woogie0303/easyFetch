@@ -60,7 +60,7 @@ class EasyFetch {
       | undefined;
 
     if (this.#baseUrl) {
-      combinedDefaultUrl = new URL(this.#baseUrl, fetchURL);
+      combinedDefaultUrl = new URL(fetchURL, this.#baseUrl);
     }
 
     if (this.#headers) {
