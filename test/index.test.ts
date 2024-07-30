@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { METHOD_WITH_BODY, METHOD_WITHOUT_BODY } from '../src/constant';
 import { easyFetch } from '../src/createInstance';
 import RequestUtils from '../src/RequestUtils';
 
@@ -19,7 +20,7 @@ describe('EasyFetch', () => {
 
   it('merges a request instance with the request config when it is passed as an argument.', async () => {
     //given
-    const spyRequestMethod = vi.spyOn(RequestUtils, 'mergeRequestConfig');
+    const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
 
     // when
@@ -39,7 +40,8 @@ describe('EasyFetch', () => {
       method: 'POST',
       referrerPolicy: 'no-referrer',
     });
-    const actualRequestValue = await spyRequestMethod.mock.results[0].value;
+    const actualRequestValue = await spyMergeRequestConfig.mock.results[0]
+      .value;
     const requestBody = await expectRequestInstance.arrayBuffer();
 
     expect(actualRequestValue[1]).toStrictEqual({
@@ -62,7 +64,7 @@ describe('EasyFetch', () => {
 
   it('merges requestInstance when requestInit with a next property is passed as an argument', async () => {
     // given
-    const spyRequestMethod = vi.spyOn(RequestUtils, 'mergeRequestConfig');
+    const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
 
     // when
@@ -79,7 +81,8 @@ describe('EasyFetch', () => {
       cache: 'no-cache',
     });
 
-    const actualRequestValue = await spyRequestMethod.mock.results[0].value;
+    const actualRequestValue = await spyMergeRequestConfig.mock.results[0]
+      .value;
 
     expect(actualRequestValue[1]).toStrictEqual({
       cache: expectRequestInstance.cache,
@@ -101,7 +104,7 @@ describe('EasyFetch', () => {
 
   it('get method does not have body', async () => {
     // given
-    const spyRequestMethod = vi.spyOn(RequestUtils, 'mergeRequestConfig');
+    const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
 
     // when
@@ -114,9 +117,27 @@ describe('EasyFetch', () => {
     });
 
     // then
-
-    const actualRequestValue = await spyRequestMethod.mock.results[0].value;
+    const actualRequestValue = await spyMergeRequestConfig.mock.results[0]
+      .value;
 
     expect(Object.keys(actualRequestValue[1]).includes('body')).toBe(false);
+  });
+
+  it('Rest API method  added the method property to the requestInit object', async () => {
+    //given
+    const mergeMethod = [...METHOD_WITHOUT_BODY, ...METHOD_WITH_BODY];
+    const easy = easyFetch();
+
+    // when
+    mergeMethod.forEach(async (method) => {
+      await easy[method]('http://sdf');
+    });
+
+    // then
+    const fetchMockedArg = fetchMocked.mock.calls;
+
+    fetchMockedArg.forEach(([url, requestInit], index) => {
+      expect(requestInit.method).toEqual(mergeMethod[index].toUpperCase());
+    });
   });
 });
