@@ -1,48 +1,28 @@
+import { METHOD_WITHOUT_BODY, REQUEST_INIT_KEYS } from './constant';
 import { hasNextConfig } from './libs/hasNextConfig';
+import { MethodWithoutBodyType } from './types/method.type';
 
 class RequestUtils {
-  static async createMergedRequestInit(
+  static async #createMergedRequestInit(
     request: Request,
-    requestInit?: RequestInit
-  ) {
+    requestInit?: RequestInitWithNextConfig | RequestInit
+  ): Promise<RequestInit> {
     const mergedRequestConfig = new Request(request, requestInit);
+    const isGetOrDeleteMethod = METHOD_WITHOUT_BODY.includes(
+      mergedRequestConfig.method.toLowerCase() as MethodWithoutBodyType
+    );
 
-    if (mergedRequestConfig.method === 'GET') {
-      return {
-        cache: mergedRequestConfig.cache,
-        credentials: mergedRequestConfig.credentials,
-        headers: mergedRequestConfig.headers,
-        integrity: mergedRequestConfig.integrity,
-        keepalive: mergedRequestConfig.keepalive,
-        method: mergedRequestConfig.method,
-        mode: mergedRequestConfig.mode,
-        priority: requestInit?.priority,
-        referrer: mergedRequestConfig.referrer,
-        redirect: mergedRequestConfig.redirect,
-        referrerPolicy: mergedRequestConfig.referrerPolicy,
-        signal: mergedRequestConfig.signal,
-        window: requestInit?.window,
-      };
-    }
+    const newRequestInit = REQUEST_INIT_KEYS.reduce(
+      (acc, cur) => ({
+        ...acc,
+        [cur]: mergedRequestConfig[cur],
+      }),
+      isGetOrDeleteMethod
+        ? {}
+        : { body: await mergedRequestConfig.arrayBuffer() }
+    ) as RequestInit;
 
-    const requestBody = await mergedRequestConfig.arrayBuffer();
-
-    return {
-      body: requestBody,
-      cache: mergedRequestConfig.cache,
-      credentials: mergedRequestConfig.credentials,
-      headers: mergedRequestConfig.headers,
-      integrity: mergedRequestConfig.integrity,
-      keepalive: mergedRequestConfig.keepalive,
-      method: mergedRequestConfig.method,
-      mode: mergedRequestConfig.mode,
-      priority: requestInit?.priority,
-      referrer: mergedRequestConfig.referrer,
-      redirect: mergedRequestConfig.redirect,
-      referrerPolicy: mergedRequestConfig.referrerPolicy,
-      signal: mergedRequestConfig.signal,
-      window: requestInit?.window,
-    };
+    return newRequestInit;
   }
 
   static async mergeRequestConfig(
@@ -53,21 +33,20 @@ class RequestUtils {
     let requestConfig: RequestInitWithNextConfig | RequestInit;
 
     if (requestInit && hasNextConfig(requestInit)) {
-      const { next, ...rest } = requestInit;
-      const mergedRequestInit = await RequestUtils.createMergedRequestInit(
-        request,
-        rest
-      );
+      const { next, priority, window, ...rest } = requestInit;
 
       requestConfig = {
-        ...mergedRequestInit,
+        ...(await RequestUtils.#createMergedRequestInit(request, rest)),
+        priority,
+        window,
         next,
       };
     } else {
-      requestConfig = await RequestUtils.createMergedRequestInit(
-        request,
-        requestInit
-      );
+      requestConfig = {
+        ...(await RequestUtils.#createMergedRequestInit(request, requestInit)),
+        priority: requestInit?.priority,
+        window: requestInit?.window,
+      };
     }
 
     return [fetchURL, requestConfig];
