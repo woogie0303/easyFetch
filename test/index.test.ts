@@ -149,6 +149,43 @@ describe('EasyFetch', () => {
 
     fetchMockedArg.forEach(([url, requestInit], index) => {
       expect(requestInit.method).toEqual(mergeMethod[index].toUpperCase());
+      expect(url).toEqual('http://sdf');
     });
+  });
+
+  it('combines URL with the base URL when provided.', async () => {
+    // given
+    const easy = easyFetch({ baseUrl: 'https://attraction/api/v1/' });
+
+    // when
+    await easy.get('userRank/strict');
+
+    // then
+    const mergeUrlWithBaseUrl = fetchMocked.mock.calls[0][0];
+
+    expect(mergeUrlWithBaseUrl.toString()).equal(
+      'https://attraction/api/v1/userRank/strict'
+    );
+  });
+
+  it('combines headers with the default header when provided', async () => {
+    // given
+    const easy = easyFetch({ headers: { 'Cache-Control': 'no-cache' } });
+
+    // when
+    await easy.get('https://attraciton', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // then
+    const mergeHeadersWithDefaultHeaders = fetchMocked.mock.calls[0][1].headers;
+    const expectHeaders = new Headers({
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'application/json',
+    });
+
+    expect(mergeHeadersWithDefaultHeaders).toStrictEqual(expectHeaders);
   });
 });
