@@ -102,25 +102,36 @@ describe('EasyFetch', () => {
     });
   });
 
-  it('get method does not have body', async () => {
+  it('get and delete method does not have body', async () => {
+    // TODO: 추후 테스트 코드 리팩토링
     // given
     const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
-
-    // when
     const request = new Request('http://sdf', {
       mode: 'cors',
       cache: 'no-cache',
     });
+
+    // when
     await easy.request(request, {
       next: { revalidate: 300 },
     });
+    await easy.request(request, {
+      method: 'DELETE',
+    });
+    await easy.request(request, {
+      method: 'POST',
+    });
 
     // then
-    const actualRequestValue = await spyMergeRequestConfig.mock.results[0]
+    const getMethodReturn = await spyMergeRequestConfig.mock.results[0].value;
+    const deleteMethodReturn = await spyMergeRequestConfig.mock.results[1]
       .value;
+    const postMethodReturn = await spyMergeRequestConfig.mock.results[2].value;
 
-    expect(Object.keys(actualRequestValue[1]).includes('body')).toBe(false);
+    expect(Object.keys(getMethodReturn[1]).includes('body')).toBe(false);
+    expect(Object.keys(deleteMethodReturn[1]).includes('body')).toBe(false);
+    expect(Object.keys(postMethodReturn[1]).includes('body')).toBe(true);
   });
 
   it('Rest API method  added the method property to the requestInit object', async () => {
