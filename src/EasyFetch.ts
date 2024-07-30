@@ -1,8 +1,5 @@
 import { EasyFetchDefaultConfig } from './createInstance';
-import {
-  createMergedRequestInit,
-  hasNextConfig,
-} from './libs/mergedRequestInit';
+import RequestUtils from './RequestUtils';
 
 class EasyFetch {
   #baseUrl: string | URL | undefined;
@@ -13,28 +10,6 @@ class EasyFetch {
     this.#headers = defaultConfig?.headers;
   }
 
-  async #mergeRequestConfig(
-    request: Request,
-    requestInit?: RequestInitWithNextConfig | RequestInit
-  ): Promise<[string, RequestInitWithNextConfig | RequestInit]> {
-    const fetchURL = request.url;
-    let requestConfig: RequestInitWithNextConfig | RequestInit;
-
-    if (requestInit && hasNextConfig(requestInit)) {
-      const { next, ...rest } = requestInit;
-      const mergedRequestInit = await createMergedRequestInit(request, rest);
-
-      requestConfig = {
-        ...mergedRequestInit,
-        next,
-      };
-    }
-
-    requestConfig = await createMergedRequestInit(request, requestInit);
-
-    return [fetchURL, requestConfig];
-  }
-
   async request<T>(
     request: RequestInfo | URL,
     requestInit?: RequestInit | RequestInitWithNextConfig
@@ -43,7 +18,7 @@ class EasyFetch {
     let requestConfig: RequestInit | RequestInitWithNextConfig | undefined;
 
     if (request instanceof Request) {
-      const [url, mergeRequestConfig] = await this.#mergeRequestConfig(
+      const [url, mergeRequestConfig] = await RequestUtils.mergeRequestConfig(
         request,
         requestInit
       );
@@ -54,6 +29,19 @@ class EasyFetch {
       requestConfig = requestInit;
     }
     return this.#request<T>(fetchURL, requestConfig);
+  }
+
+  async #request<T>(
+    fetchURL: string | URL,
+    requestConfig?: RequestInit | RequestInitWithNextConfig
+  ): Promise<T> {
+    const globalFetch = fetch;
+    const combinedDefaultOptionWithFetchArgs = this.#combineDefaultOptions(
+      fetchURL,
+      requestConfig
+    );
+
+    return 1 as T;
   }
 
   #combineDefaultOptions(
@@ -89,22 +77,6 @@ class EasyFetch {
       combinedDefaultUrl ?? fetchURL,
       combinedDefaultHeaders ?? requestConfig,
     ];
-  }
-
-  async #request<T>(
-    fetchURL: string | URL,
-    requestConfig?: RequestInit | RequestInitWithNextConfig
-  ): Promise<T> {
-    const globalFetch = fetch;
-    const combinedDefaultOptionWithFetchArgs = this.#combineDefaultOptions(
-      fetchURL,
-      requestConfig
-    );
-
-    return globalFetch(
-      combinedDefaultOptionWithFetchArgs[0],
-      combinedDefaultOptionWithFetchArgs[1]
-    ) as T;
   }
 }
 

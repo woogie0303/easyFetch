@@ -7,13 +7,6 @@ export interface EasyFetchDefaultConfig {
   headers?: HeadersInit;
 }
 
-// function isMethodWithoutBody(
-//   methodArg: MethodType
-// ): methodArg is MethodWithoutBodyType {
-//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//   return METHOD_WITHOUT_BODY.includes(methodArg as any);
-// }
-
 const mergeEasyFetchWithAPIMethod = (
   defaultConfig?: EasyFetchDefaultConfig
 ) => {
@@ -24,15 +17,10 @@ const mergeEasyFetchWithAPIMethod = (
       this: EasyFetch,
       url: string | URL,
       reqConfig?: typeof method extends 'get'
-        ? RequestInit
-        : RequestInitWithNextConfig
+        ? RequestInitWithNextConfig
+        : RequestInit
     ) {
-      const requestInit = new Request(url, {
-        method,
-        ...reqConfig,
-      });
-
-      return this.request<T>(url, requestInit);
+      return this.request<T>(url, reqConfig);
     }
 
     (EasyFetch.prototype as EasyFetchWithAPIMethodsType)[method] =
@@ -46,13 +34,12 @@ const mergeEasyFetchWithAPIMethod = (
       reqBody?: object,
       reqConfig?: Omit<RequestInit, 'method'>
     ): Promise<T> {
-      const requestInit = new Request(url, {
-        method,
+      const mergedRequestConfigWithBody: Request = new Request(url, {
         ...reqConfig,
         body: reqBody && JSON.stringify(reqBody),
       });
 
-      return this.request(url, requestInit);
+      return this.request(url, mergedRequestConfigWithBody);
     }
 
     (EasyFetch.prototype as EasyFetchWithAPIMethodsType)[method] =
@@ -69,6 +56,3 @@ const createInstance = (defaultConfig?: EasyFetchDefaultConfig) => {
 };
 
 export const easyFetch = createInstance;
-
-const hi = easyFetch();
-hi.get<EasyFetchDefaultConfig>('htttp:/sdfjklsdf', {});
