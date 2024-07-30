@@ -44,12 +44,12 @@ class RequestUtils {
         ...mergedRequestInit,
         next,
       };
+    } else {
+      requestConfig = await RequestUtils.createMergedRequestInit(
+        request,
+        requestInit
+      );
     }
-
-    requestConfig = await RequestUtils.createMergedRequestInit(
-      request,
-      requestInit
-    );
 
     return [fetchURL, requestConfig];
   }
