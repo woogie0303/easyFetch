@@ -20,7 +20,10 @@ const mergeEasyFetchWithAPIMethod = (
         ? RequestInitWithNextConfig
         : RequestInit
     ) {
-      return this.request<T>(url, reqConfig);
+      return this.request<T>(url, {
+        ...reqConfig,
+        method: method.toUpperCase(),
+      });
     }
 
     (EasyFetch.prototype as EasyFetchWithAPIMethodsType)[method] =
@@ -34,10 +37,11 @@ const mergeEasyFetchWithAPIMethod = (
       reqBody?: object,
       reqConfig?: Omit<RequestInit, 'method'>
     ): Promise<T> {
-      const mergedRequestConfigWithBody: Request = new Request(url, {
+      const mergedRequestConfigWithBody: RequestInit = {
         ...reqConfig,
         body: reqBody && JSON.stringify(reqBody),
-      });
+        method: method.toUpperCase(),
+      };
 
       return this.request(url, mergedRequestConfigWithBody);
     }
