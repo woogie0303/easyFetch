@@ -1,8 +1,22 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { easyFetch } from '../src/createInstance';
 import RequestUtils from '../src/RequestUtils';
 
 describe('EasyFetch', () => {
+  const globalFetch = fetch;
+  let fetchMocked: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchMocked = vi.fn();
+    // @ts-ignore
+    fetch = fetchMocked;
+  });
+
+  afterEach(() => {
+    // @ts-ignore
+    fetch = globalFetch;
+  });
+
   it('merges a request instance with the request config when it is passed as an argument.', async () => {
     //given
     const spyRequestMethod = vi.spyOn(RequestUtils, 'mergeRequestConfig');
@@ -14,7 +28,7 @@ describe('EasyFetch', () => {
       cache: 'no-cache',
     });
     await easy.request(request, {
-      method: 'GET',
+      method: 'POST',
       referrerPolicy: 'no-referrer',
     });
 
@@ -22,14 +36,14 @@ describe('EasyFetch', () => {
     const expectRequestInstance = new Request('http://sdf', {
       mode: 'cors',
       cache: 'no-cache',
-      method: 'GET',
+      method: 'POST',
       referrerPolicy: 'no-referrer',
     });
-    const expectRequestBody = await expectRequestInstance.arrayBuffer();
     const actualRequestValue = await spyRequestMethod.mock.results[0].value;
+    const requestBody = await expectRequestInstance.arrayBuffer();
 
     expect(actualRequestValue[1]).toStrictEqual({
-      body: expectRequestBody,
+      body: requestBody,
       cache: expectRequestInstance.cache,
       credentials: expectRequestInstance.credentials,
       headers: expectRequestInstance.headers,
@@ -51,7 +65,7 @@ describe('EasyFetch', () => {
     const spyRequestMethod = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
 
-    // then
+    // when
     const request = new Request('http://sdf', {
       mode: 'cors',
       cache: 'no-cache',
@@ -64,11 +78,10 @@ describe('EasyFetch', () => {
     const expectRequestInstance = new Request('http://sd', {
       cache: 'no-cache',
     });
-    const expectRequestBody = await expectRequestInstance.arrayBuffer();
+
     const actualRequestValue = await spyRequestMethod.mock.results[0].value;
 
     expect(actualRequestValue[1]).toStrictEqual({
-      body: expectRequestBody,
       cache: expectRequestInstance.cache,
       credentials: expectRequestInstance.credentials,
       headers: expectRequestInstance.headers,
@@ -84,5 +97,26 @@ describe('EasyFetch', () => {
       window: undefined,
       next: { revalidate: 300 },
     });
+  });
+
+  it('get method does not have body', async () => {
+    // given
+    const spyRequestMethod = vi.spyOn(RequestUtils, 'mergeRequestConfig');
+    const easy = easyFetch();
+
+    // when
+    const request = new Request('http://sdf', {
+      mode: 'cors',
+      cache: 'no-cache',
+    });
+    await easy.request(request, {
+      next: { revalidate: 300 },
+    });
+
+    // then
+
+    const actualRequestValue = await spyRequestMethod.mock.results[0].value;
+
+    expect(Object.keys(actualRequestValue[1]).includes('body')).toBe(false);
   });
 });
