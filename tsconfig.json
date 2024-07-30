@@ -6,10 +6,11 @@
     "moduleResolution": "Node",
     "strict": true,
     "outDir": "dist/",
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "skipLibCheck": true
   },
-  "files": ["global.d.ts"],
-  "include": ["src/", "global.d.ts"],
-  "exclude": ["tests/", "dist/", "examples/"],
+  "files": ["src/global.d.ts"],
+  "include": ["src/", "src/global.d.ts", "test/"],
+  "exclude": ["dist/", "examples/"],
   "forceConsistentCasingInFileNames": true
 }
