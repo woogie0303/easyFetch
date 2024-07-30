@@ -41,6 +41,11 @@ class EasyFetch {
       requestConfig
     );
 
+    const res = globalFetch(
+      combinedDefaultOptionWithFetchArgs[0],
+      combinedDefaultOptionWithFetchArgs[1]
+    );
+
     return 1 as T;
   }
 
