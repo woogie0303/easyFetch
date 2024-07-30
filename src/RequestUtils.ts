@@ -6,6 +6,25 @@ class RequestUtils {
     requestInit?: RequestInit
   ) {
     const mergedRequestConfig = new Request(request, requestInit);
+
+    if (mergedRequestConfig.method === 'GET') {
+      return {
+        cache: mergedRequestConfig.cache,
+        credentials: mergedRequestConfig.credentials,
+        headers: mergedRequestConfig.headers,
+        integrity: mergedRequestConfig.integrity,
+        keepalive: mergedRequestConfig.keepalive,
+        method: mergedRequestConfig.method,
+        mode: mergedRequestConfig.mode,
+        priority: requestInit?.priority,
+        referrer: mergedRequestConfig.referrer,
+        redirect: mergedRequestConfig.redirect,
+        referrerPolicy: mergedRequestConfig.referrerPolicy,
+        signal: mergedRequestConfig.signal,
+        window: requestInit?.window,
+      };
+    }
+
     const requestBody = await mergedRequestConfig.arrayBuffer();
 
     return {
