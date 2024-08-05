@@ -188,4 +188,49 @@ describe('EasyFetch', () => {
 
     expect(mergeHeadersWithDefaultHeaders).toStrictEqual(expectHeaders);
   });
+
+  it('combines interceptor request config', async () => {
+    // given
+    const easy = easyFetch({ headers: { 'Cache-Control': 'no-cache' } });
+    easy.interceptor.request((req) => {
+      const [baseurl, requestConfig] = req;
+
+      return [
+        baseurl,
+        {
+          ...requestConfig,
+          credentials: 'include',
+          mode: 'cors',
+        },
+      ];
+    });
+
+    // when
+    await easy.post(
+      'https://attraciton',
+      { data: 1 },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    // then
+    const mergeRequestInterceptor: RequestInit = {
+      ...fetchMocked.mock.calls[0][1],
+    };
+    const expectValue: RequestInit = {
+      headers: new Headers({
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/json',
+      }),
+      method: 'POST',
+      body: JSON.stringify({ data: 1 }),
+      mode: 'cors',
+      credentials: 'include',
+    };
+
+    expect(mergeRequestInterceptor).toStrictEqual(expectValue);
+  });
 });

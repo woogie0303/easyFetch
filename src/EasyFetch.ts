@@ -1,13 +1,16 @@
 import { EasyFetchDefaultConfig } from './createInstance';
+import Interceptor from './Interceptor';
 import RequestUtils from './RequestUtils';
 
 class EasyFetch {
   #baseUrl: string | URL | undefined;
   #headers: HeadersInit | undefined;
+  #interceptor: Interceptor;
 
   constructor(defaultConfig?: EasyFetchDefaultConfig) {
     this.#baseUrl = defaultConfig?.baseUrl;
     this.#headers = defaultConfig?.headers;
+    this.#interceptor = new Interceptor();
   }
 
   async request<T>(
@@ -41,12 +44,21 @@ class EasyFetch {
       requestConfig
     );
 
-    const res = globalFetch(
-      combinedDefaultOptionWithFetchArgs[0],
-      combinedDefaultOptionWithFetchArgs[1]
-    );
+    const applyInterceptorRequest =
+      await this.#interceptor.flushRequestInterceptors(
+        Promise.resolve(combinedDefaultOptionWithFetchArgs)
+      );
 
+    globalFetch(applyInterceptorRequest[0], applyInterceptorRequest[1]);
     return 1 as T;
+  }
+
+  async #dispatchFetch(
+    value:
+      | unknown
+      | [string | URL, RequestInit | RequestInitWithNextConfig | undefined]
+  ): Promise<unknown> {
+    return;
   }
 
   #combineDefaultOptions(
@@ -82,6 +94,10 @@ class EasyFetch {
       combinedDefaultUrl ?? fetchURL,
       combinedDefaultHeaders ?? requestConfig,
     ];
+  }
+
+  get interceptor() {
+    return this.#interceptor;
   }
 }
 
