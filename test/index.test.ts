@@ -233,4 +233,23 @@ describe('EasyFetch', () => {
 
     expect(mergeRequestInterceptor).toStrictEqual(expectValue);
   });
+
+  it('sets the default to application/json when the Content-Type is not set.', async () => {
+    // given
+    const easy = easyFetch();
+
+    // when
+    await easy.get('https://attraciton');
+
+    // then
+    const expectValue = new Headers({
+      'Content-type': 'application/json',
+    });
+
+    console.log(fetchMocked.mock.calls);
+
+    const requestHeaders = new Headers(fetchMocked.mock.calls[0][1].headers);
+
+    expect(requestHeaders).toStrictEqual(expectValue);
+  });
 });
