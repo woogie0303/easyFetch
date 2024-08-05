@@ -38,7 +38,6 @@ class EasyFetch {
     fetchURL: string | URL,
     requestConfig?: RequestInit | RequestInitWithNextConfig
   ): Promise<T> {
-    const globalFetch = fetch;
     const combinedDefaultOptionWithFetchArgs = this.#combineDefaultOptions(
       fetchURL,
       requestConfig
@@ -49,15 +48,24 @@ class EasyFetch {
         Promise.resolve(combinedDefaultOptionWithFetchArgs)
       );
 
-    globalFetch(applyInterceptorRequest[0], applyInterceptorRequest[1]);
+    this.#dispatchFetch(applyInterceptorRequest[0], applyInterceptorRequest[1]);
     return 1 as T;
   }
 
   async #dispatchFetch(
-    value:
-      | unknown
-      | [string | URL, RequestInit | RequestInitWithNextConfig | undefined]
+    fetchURL: string | URL,
+    requestConfig?: RequestInit | RequestInitWithNextConfig
   ): Promise<unknown> {
+    const globalFetch = fetch;
+    const headers = new Headers(requestConfig?.headers);
+
+    headers.get('Content-Type') ??
+      headers.set('Content-Type', 'application/json');
+
+    globalFetch(fetchURL, {
+      ...requestConfig,
+      headers,
+    });
     return;
   }
 
