@@ -2,6 +2,7 @@ import type {
   InterceptorArgs,
   InterceptorCallbackType,
 } from './types/interceptor.type';
+import { EasyFetchResponse } from './types/response.type';
 
 class Interceptor {
   requestCbArr: InterceptorArgs<'request'>[];
@@ -23,6 +24,19 @@ class Interceptor {
     initVal: Promise<[string | URL, RequestInit | undefined]>
   ) {
     const flushArr = this.requestCbArr;
+
+    let promiseInit = initVal;
+
+    for (let i = 0; i < flushArr.length; i++) {
+      promiseInit = promiseInit.then(...flushArr[i]);
+    }
+
+    return promiseInit;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  flushResPonseInterceptors(initVal: Promise<EasyFetchResponse<any>>) {
+    const flushArr = this.responseCbArr;
 
     let promiseInit = initVal;
 

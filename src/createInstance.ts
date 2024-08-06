@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { METHOD_WITH_BODY, METHOD_WITHOUT_BODY } from './constant';
 import EasyFetch from './EasyFetch';
 import type { EasyFetchWithAPIMethodsType } from './types/method.type';
+import { EasyFetchResponse } from './types/response.type';
 
 export interface EasyFetchDefaultConfig {
   baseUrl?: string | URL;
@@ -16,10 +18,8 @@ const mergeEasyFetchWithAPIMethod = (
     async function prototypeAPIMethodWithoutData<T>(
       this: EasyFetch,
       url: string | URL,
-      reqConfig?: typeof method extends 'get'
-        ? RequestInitWithNextConfig
-        : RequestInit
-    ) {
+      reqConfig?: RequestInitWithNextConfig
+    ): Promise<EasyFetchResponse<T>> {
       return this.request<T>(url, {
         ...reqConfig,
         method: method.toUpperCase(),
@@ -36,14 +36,14 @@ const mergeEasyFetchWithAPIMethod = (
       url: string | URL,
       reqBody?: object,
       reqConfig?: Omit<RequestInit, 'method'>
-    ): Promise<T> {
+    ): Promise<EasyFetchResponse<T>> {
       const mergedRequestConfigWithBody: RequestInit = {
         ...reqConfig,
         body: reqBody && JSON.stringify(reqBody),
         method: method.toUpperCase(),
       };
 
-      return this.request(url, mergedRequestConfigWithBody);
+      return this.request<T>(url, mergedRequestConfigWithBody);
     }
 
     (EasyFetch.prototype as EasyFetchWithAPIMethodsType)[method] =
