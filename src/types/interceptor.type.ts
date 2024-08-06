@@ -11,7 +11,7 @@ interface InterceptorCallbackType<T extends 'request' | 'response'> {
       ?
           | Promise<[string | URL, RequestInit | undefined]>
           | [string | URL, RequestInit | undefined]
-      : Promise<EasyFetchResponse<any>>,
+      : Promise<EasyFetchResponse<any>> | EasyFetchResponse<any>,
     onRejected?: (err: any) => any
   ): void;
 }
