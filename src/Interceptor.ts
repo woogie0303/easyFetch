@@ -35,7 +35,7 @@ class Interceptor {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  flushResPonseInterceptors(initVal: Promise<EasyFetchResponse<any>>) {
+  async flushResPonseInterceptors(initVal: Promise<EasyFetchResponse<any>>) {
     const flushArr = this.responseCbArr;
 
     let promiseInit = initVal;

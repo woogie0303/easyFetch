@@ -1,6 +1,7 @@
 import { EasyFetchDefaultConfig } from './createInstance';
 import Interceptor from './Interceptor';
 import RequestUtils from './RequestUtils';
+import type { EasyFetchResponse } from './types/response.type';
 
 class EasyFetch {
   #baseUrl: string | URL | undefined;
@@ -16,7 +17,7 @@ class EasyFetch {
   async request<T>(
     request: RequestInfo | URL,
     requestInit?: RequestInit | RequestInitWithNextConfig
-  ): Promise<T> {
+  ) {
     let fetchURL: string | URL;
     let requestConfig: RequestInit | RequestInitWithNextConfig | undefined;
 
@@ -37,7 +38,7 @@ class EasyFetch {
   async #request<T>(
     fetchURL: string | URL,
     requestConfig?: RequestInit | RequestInitWithNextConfig
-  ): Promise<T> {
+  ) {
     const combinedDefaultOptionWithFetchArgs = this.#combineDefaultOptions(
       fetchURL,
       requestConfig
@@ -48,25 +49,60 @@ class EasyFetch {
         Promise.resolve(combinedDefaultOptionWithFetchArgs)
       );
 
-    this.#dispatchFetch(applyInterceptorRequest[0], applyInterceptorRequest[1]);
-    return 1 as T;
+    //TODO: response값이 같지 않으면 에러발생 왜냐하면 transform result가 아니기 때문에
+
+    return this.#interceptor.flushResPonseInterceptors(
+      this.#dispatchFetch<T>(
+        applyInterceptorRequest[0],
+        applyInterceptorRequest[1]
+      )
+    ) as Promise<EasyFetchResponse<T>>;
   }
 
-  async #dispatchFetch(
+  async #dispatchFetch<T>(
     fetchURL: string | URL,
     requestConfig?: RequestInit | RequestInitWithNextConfig
-  ): Promise<unknown> {
+  ): Promise<EasyFetchResponse<T>> {
     const globalFetch = fetch;
     const headers = new Headers(requestConfig?.headers);
 
     headers.get('Content-Type') ??
       headers.set('Content-Type', 'application/json');
 
-    globalFetch(fetchURL, {
-      ...requestConfig,
-      headers,
-    });
-    return;
+    try {
+      const res = await globalFetch(fetchURL, {
+        ...requestConfig,
+        headers,
+      });
+
+      const body = (await res.json()) as T;
+
+      const response: EasyFetchResponse<T> = {
+        headers: res.headers,
+        ok: res.ok,
+        redirected: res.redirected,
+        status: res.status,
+        statusText: res.statusText,
+        type: res.type,
+        url: res.url,
+        config: [fetchURL, requestConfig],
+        body,
+      };
+
+      if (!res.ok || res.status >= 400) {
+        throw new Error(`${res.status} Error`, {
+          cause: response,
+        });
+      }
+
+      return Promise.resolve(response);
+    } catch (err) {
+      if (err instanceof Error) {
+        return Promise.reject(err.cause);
+      } else {
+        throw err;
+      }
+    }
   }
 
   #combineDefaultOptions(
