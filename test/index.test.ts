@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { METHOD_WITH_BODY, METHOD_WITHOUT_BODY } from '../src/constant';
 import { easyFetch } from '../src/createInstance';
 import RequestUtils from '../src/RequestUtils';
+import { EasyFetchResponse } from '../src/types/response.type';
 
 describe('EasyFetch', () => {
   const globalFetch = fetch;
@@ -20,8 +21,13 @@ describe('EasyFetch', () => {
 
   it('merges a request instance with the request config when it is passed as an argument.', async () => {
     //given
+    const response = new Response(JSON.stringify({ attraction: 'main' }), {
+      status: 200,
+    });
     const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
+
+    fetchMocked.mockResolvedValue(response);
 
     // when
     const request = new Request('http://sdf', {
@@ -64,8 +70,13 @@ describe('EasyFetch', () => {
 
   it('merges requestInstance when requestInit with a next property is passed as an argument', async () => {
     // given
+    const response = new Response(JSON.stringify({ attraction: 'main' }), {
+      status: 200,
+    });
     const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
+
+    fetchMocked.mockResolvedValue(response);
 
     // when
     const request = new Request('http://sdf', {
@@ -103,7 +114,6 @@ describe('EasyFetch', () => {
   });
 
   it('get and delete method does not have body', async () => {
-    // TODO: 추후 테스트 코드 리팩토링
     // given
     const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
@@ -113,12 +123,26 @@ describe('EasyFetch', () => {
     });
 
     // when
+    // GET 요청
+    fetchMocked.mockResolvedValueOnce(
+      new Response(JSON.stringify({ attraction: 'main' }), { status: 200 })
+    );
     await easy.request(request, {
       next: { revalidate: 300 },
     });
+
+    // DELETE 요청
+    fetchMocked.mockResolvedValueOnce(
+      new Response(JSON.stringify({ attraction: 'main' }), { status: 200 })
+    );
     await easy.request(request, {
       method: 'DELETE',
     });
+
+    // POST 요청
+    fetchMocked.mockResolvedValueOnce(
+      new Response(JSON.stringify({ attraction: 'main' }), { status: 200 })
+    );
     await easy.request(request, {
       method: 'POST',
     });
@@ -134,15 +158,23 @@ describe('EasyFetch', () => {
     expect(Object.keys(postMethodReturn[1]).includes('body')).toBe(true);
   });
 
-  it('Rest API method  added the method property to the requestInit object', async () => {
-    //given
+  it('Rest API method added the method property to the requestInit object', async () => {
+    // given
     const mergeMethod = [...METHOD_WITHOUT_BODY, ...METHOD_WITH_BODY];
-    const easy = easyFetch();
 
     // when
-    mergeMethod.forEach(async (method) => {
-      await easy[method]('http://sdf');
-    });
+    await Promise.all(
+      mergeMethod.map(async (method) => {
+        // 각 메서드 호출마다 새로운 Response 객체를 생성합니다.
+        const response = new Response(JSON.stringify({ attraction: 'main' }), {
+          status: 200,
+        });
+        fetchMocked.mockResolvedValueOnce(response);
+
+        const easy = easyFetch();
+        await easy[method]('http://sdf');
+      })
+    );
 
     // then
     const fetchMockedArg = fetchMocked.mock.calls;
@@ -155,7 +187,11 @@ describe('EasyFetch', () => {
 
   it('combines URL with the base URL when provided.', async () => {
     // given
+    const response = new Response(JSON.stringify({ attraction: 'main' }), {
+      status: 200,
+    });
     const easy = easyFetch({ baseUrl: 'https://attraction/api/v1/' });
+    fetchMocked.mockResolvedValue(response);
 
     // when
     await easy.get('userRank/strict');
@@ -170,7 +206,11 @@ describe('EasyFetch', () => {
 
   it('combines headers with the default header when provided', async () => {
     // given
+    const response = new Response(JSON.stringify({ attraction: 'main' }), {
+      status: 200,
+    });
     const easy = easyFetch({ headers: { 'Cache-Control': 'no-cache' } });
+    fetchMocked.mockResolvedValue(response);
 
     // when
     await easy.get('https://attraciton', {
@@ -191,6 +231,12 @@ describe('EasyFetch', () => {
 
   it('combines interceptor request config', async () => {
     // given
+    const response = new Response(JSON.stringify({ attraction: 'main' }), {
+      status: 200,
+    });
+
+    fetchMocked.mockResolvedValue(response);
+
     const easy = easyFetch({ headers: { 'Cache-Control': 'no-cache' } });
     easy.interceptor.request((req) => {
       const [baseurl, requestConfig] = req;
@@ -234,8 +280,44 @@ describe('EasyFetch', () => {
     expect(mergeRequestInterceptor).toStrictEqual(expectValue);
   });
 
+  it('combines interceptor response config', async () => {
+    // given
+    const response = new Response(JSON.stringify({ message: '400 error' }), {
+      status: 400,
+    });
+
+    fetchMocked.mockResolvedValue(response);
+
+    // when
+    const easy = easyFetch({ headers: { 'Cache-Control': 'no-cache' } });
+
+    easy.interceptor.response(
+      (res) => {
+        return res;
+      },
+      (err) => {
+        const error = err as EasyFetchResponse<{
+          message: string;
+        }>;
+
+        return error.body.message;
+      }
+    );
+
+    const actualValue = await easy.get('sdfdsf');
+    const expectValue = '400 error';
+
+    expect(actualValue).toEqual(expectValue);
+  });
+
   it('sets the default to application/json when the Content-Type is not set.', async () => {
     // given
+    const response = new Response(JSON.stringify({ attraction: 'main' }), {
+      status: 200,
+    });
+
+    fetchMocked.mockResolvedValue(response);
+
     const easy = easyFetch();
 
     // when
@@ -245,8 +327,6 @@ describe('EasyFetch', () => {
     const expectValue = new Headers({
       'Content-type': 'application/json',
     });
-
-    console.log(fetchMocked.mock.calls);
 
     const requestHeaders = new Headers(fetchMocked.mock.calls[0][1].headers);
 
