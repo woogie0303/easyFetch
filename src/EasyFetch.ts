@@ -141,7 +141,10 @@ class EasyFetch {
   }
 
   get interceptor() {
-    return this.#interceptor;
+    return {
+      request: this.#interceptor.request,
+      response: this.#interceptor.response,
+    };
   }
 }
 
