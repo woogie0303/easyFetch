@@ -2,6 +2,7 @@
 import { METHOD_WITH_BODY, METHOD_WITHOUT_BODY } from './constant';
 import EasyFetch from './EasyFetch';
 import type { EasyFetchWithAPIMethodsType } from './types/method.type';
+import { RequestInitWithNextConfig } from './types/nextProperty.type';
 import { EasyFetchResponse } from './types/response.type';
 
 export interface EasyFetchDefaultConfig {

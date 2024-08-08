@@ -1,5 +1,6 @@
 import { METHOD_WITH_BODY, METHOD_WITHOUT_BODY } from '../constant';
 import EasyFetch from '../EasyFetch';
+import { RequestInitWithNextConfig } from './nextProperty.type';
 import { EasyFetchResponse } from './response.type';
 
 type MethodWithBodyType = (typeof METHOD_WITH_BODY)[number];

@@ -1,6 +1,7 @@
 import { EasyFetchDefaultConfig } from './createInstance';
 import Interceptor from './Interceptor';
 import RequestUtils from './RequestUtils';
+import { RequestInitWithNextConfig } from './types/nextProperty.type';
 import type { EasyFetchResponse } from './types/response.type';
 
 class EasyFetch {

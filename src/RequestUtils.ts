@@ -1,6 +1,7 @@
 import { METHOD_WITHOUT_BODY, REQUEST_INIT_KEYS } from './constant';
 import { hasNextConfig } from './libs/hasNextConfig';
 import { MethodWithoutBodyType } from './types/method.type';
+import { RequestInitWithNextConfig } from './types/nextProperty.type';
 
 class RequestUtils {
   static async #createMergedRequestInit(

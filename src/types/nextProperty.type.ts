@@ -6,3 +6,5 @@ interface NextFetchRequestConfig {
 interface RequestInitWithNextConfig extends globalThis.RequestInit {
   next?: NextFetchRequestConfig | undefined;
 }
+
+export { RequestInitWithNextConfig };
