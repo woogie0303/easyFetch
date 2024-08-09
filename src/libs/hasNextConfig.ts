@@ -1,9 +1,11 @@
-import { RequestInitWithNextConfig } from '../types/nextProperty.type';
+import { EasyFetchResponse } from '../types/response.type';
 
-const hasNextConfig = (
-  reqConfig: RequestInit | RequestInitWithNextConfig
-): reqConfig is RequestInitWithNextConfig => {
-  return Object.keys(reqConfig).includes('next');
+const hasEasyFetchResponse = <T>(
+  error: unknown
+): error is EasyFetchResponse<T> => {
+  return Object.keys((error as Error).cause as EasyFetchResponse<T>).includes(
+    'config'
+  );
 };
 
-export { hasNextConfig };
+export { hasEasyFetchResponse };

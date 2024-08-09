@@ -1,5 +1,6 @@
 import { EasyFetchDefaultConfig } from './createInstance';
 import Interceptor from './Interceptor';
+import { hasEasyFetchResponse } from './libs/hasNextConfig';
 import RequestUtils from './RequestUtils';
 import { RequestInitWithNextConfig } from './types/nextProperty.type';
 import type { EasyFetchResponse } from './types/response.type';
@@ -90,8 +91,7 @@ class EasyFetch {
         body,
       };
 
-      // Todo: 500 이하 추가
-      if (!res.ok || res.status >= 400) {
+      if (!res.ok || (res.status < 500 && res.status >= 400)) {
         throw new Error(`${res.status} Error`, {
           cause: response,
         });
@@ -99,8 +99,8 @@ class EasyFetch {
 
       return Promise.resolve(response);
     } catch (err) {
-      // TODO: Easyresponse 형태로 바꾸기
-      if (err instanceof Error) {
+      // TODO: Test 코드 작성
+      if (err instanceof Error && hasEasyFetchResponse(err)) {
         return Promise.reject(err.cause);
       } else {
         throw err;
