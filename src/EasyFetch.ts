@@ -17,10 +17,10 @@ class EasyFetch {
 
   async request<T>(
     request: RequestInfo | URL,
-    requestInit?: RequestInit | RequestInitWithNextConfig
+    requestInit?: RequestInitWithNextConfig
   ) {
     let fetchURL: string | URL;
-    let requestConfig: RequestInit | RequestInitWithNextConfig | undefined;
+    let requestConfig: RequestInitWithNextConfig | undefined;
 
     if (request instanceof Request) {
       const [url, mergeRequestConfig] = await RequestUtils.mergeRequestConfig(
@@ -38,7 +38,7 @@ class EasyFetch {
 
   async #request<T>(
     fetchURL: string | URL,
-    requestConfig?: RequestInit | RequestInitWithNextConfig
+    requestConfig?: RequestInitWithNextConfig
   ) {
     const combinedDefaultOptionWithFetchArgs = this.#combineDefaultOptions(
       fetchURL,
@@ -62,7 +62,7 @@ class EasyFetch {
 
   async #dispatchFetch<T>(
     fetchURL: string | URL,
-    requestConfig?: RequestInit | RequestInitWithNextConfig
+    requestConfig?: RequestInitWithNextConfig
   ): Promise<EasyFetchResponse<T>> {
     const globalFetch = fetch;
     const headers = new Headers(requestConfig?.headers);
@@ -90,6 +90,7 @@ class EasyFetch {
         body,
       };
 
+      // Todo: 500 이하 추가
       if (!res.ok || res.status >= 400) {
         throw new Error(`${res.status} Error`, {
           cause: response,
@@ -98,6 +99,7 @@ class EasyFetch {
 
       return Promise.resolve(response);
     } catch (err) {
+      // TODO: Easyresponse 형태로 바꾸기
       if (err instanceof Error) {
         return Promise.reject(err.cause);
       } else {
@@ -108,13 +110,10 @@ class EasyFetch {
 
   #combineDefaultOptions(
     fetchURL: string | URL,
-    requestConfig: RequestInit | RequestInitWithNextConfig | undefined
-  ): [string | URL, RequestInit | RequestInitWithNextConfig | undefined] {
+    requestConfig: RequestInitWithNextConfig | undefined
+  ): [string | URL, RequestInitWithNextConfig | undefined] {
     let combinedDefaultUrl: string | URL | undefined;
-    let combinedDefaultHeaders:
-      | RequestInit
-      | RequestInitWithNextConfig
-      | undefined;
+    let combinedDefaultHeaders: RequestInitWithNextConfig | undefined;
 
     if (this.#baseUrl) {
       combinedDefaultUrl = new URL(fetchURL, this.#baseUrl);
@@ -122,11 +121,10 @@ class EasyFetch {
 
     if (this.#headers) {
       const defaultHeaders = new Headers(this.#headers);
+      const requestConfigHeaders = new Headers(requestConfig?.headers);
 
-      for (const [key, value] of new Headers(
-        requestConfig?.headers
-      ).entries()) {
-        defaultHeaders.set(key, value);
+      for (const [key, value] of defaultHeaders.entries()) {
+        requestConfigHeaders.set(key, value);
       }
 
       combinedDefaultHeaders = {
