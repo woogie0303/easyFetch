@@ -1,13 +1,12 @@
 import { METHOD_WITHOUT_BODY, REQUEST_INIT_KEYS } from './constant';
-import { hasNextConfig } from './libs/hasNextConfig';
 import { MethodWithoutBodyType } from './types/method.type';
 import { RequestInitWithNextConfig } from './types/nextProperty.type';
 
 class RequestUtils {
   static async #createMergedRequestInit(
     request: Request,
-    requestInit?: RequestInitWithNextConfig | RequestInit
-  ): Promise<RequestInit> {
+    requestInit?: RequestInitWithNextConfig
+  ): Promise<RequestInitWithNextConfig> {
     const mergedRequestConfig = new Request(request, requestInit);
     const isGetOrDeleteMethod = METHOD_WITHOUT_BODY.includes(
       mergedRequestConfig.method.toLowerCase() as MethodWithoutBodyType
@@ -28,12 +27,12 @@ class RequestUtils {
 
   static async mergeRequestConfig(
     request: Request,
-    requestInit?: RequestInitWithNextConfig | RequestInit
-  ): Promise<[string, RequestInitWithNextConfig | RequestInit]> {
+    requestInit?: RequestInitWithNextConfig
+  ): Promise<[string, RequestInitWithNextConfig | undefined]> {
     const fetchURL = request.url;
-    let requestConfig: RequestInitWithNextConfig | RequestInit;
+    let requestConfig: RequestInitWithNextConfig | undefined;
 
-    if (requestInit && hasNextConfig(requestInit)) {
+    if (requestInit) {
       const { next, priority, window, ...rest } = requestInit;
 
       requestConfig = {
@@ -44,9 +43,7 @@ class RequestUtils {
       };
     } else {
       requestConfig = {
-        ...(await RequestUtils.#createMergedRequestInit(request, requestInit)),
-        priority: requestInit?.priority,
-        window: requestInit?.window,
+        ...(await RequestUtils.#createMergedRequestInit(request)),
       };
     }
 

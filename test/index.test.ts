@@ -48,6 +48,7 @@ describe('EasyFetch', () => {
     });
     const actualRequestValue = await spyMergeRequestConfig.mock.results[0]
       .value;
+
     const requestBody = await expectRequestInstance.arrayBuffer();
 
     expect(actualRequestValue[1]).toStrictEqual({
@@ -60,6 +61,7 @@ describe('EasyFetch', () => {
       method: expectRequestInstance.method,
       mode: expectRequestInstance.mode,
       priority: undefined,
+      next: undefined,
       referrer: expectRequestInstance.referrer,
       redirect: expectRequestInstance.redirect,
       referrerPolicy: expectRequestInstance.referrerPolicy,

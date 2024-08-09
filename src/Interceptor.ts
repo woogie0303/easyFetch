@@ -2,6 +2,7 @@ import type {
   InterceptorArgs,
   InterceptorCallbackType,
 } from './types/interceptor.type';
+import { RequestInitWithNextConfig } from './types/nextProperty.type';
 import { EasyFetchResponse } from './types/response.type';
 
 class Interceptor {
@@ -21,7 +22,7 @@ class Interceptor {
   };
 
   async flushRequestInterceptors(
-    initVal: Promise<[string | URL, RequestInit | undefined]>
+    initVal: Promise<[string | URL, RequestInitWithNextConfig | undefined]>
   ) {
     const flushArr = this.requestCbArr;
 

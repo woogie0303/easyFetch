@@ -36,9 +36,9 @@ const mergeEasyFetchWithAPIMethod = (
       this: EasyFetch,
       url: string | URL,
       reqBody?: object,
-      reqConfig?: Omit<RequestInit, 'method'>
+      reqConfig?: Omit<RequestInitWithNextConfig, 'method'>
     ): Promise<EasyFetchResponse<T>> {
-      const mergedRequestConfigWithBody: RequestInit = {
+      const mergedRequestConfigWithBody: RequestInitWithNextConfig = {
         ...reqConfig,
         body: reqBody && JSON.stringify(reqBody),
         method: method.toUpperCase(),
