@@ -5,7 +5,7 @@ type EasyFetchResponse<T> = Omit<
   keyof Body | 'clone'
 > & {
   body: T;
-  config: [string | URL, RequestInit | RequestInitWithNextConfig | undefined];
+  config: [string | URL, RequestInitWithNextConfig | undefined];
 };
 
 Response;

@@ -87,7 +87,13 @@ class EasyFetch {
         statusText: res.statusText,
         type: res.type,
         url: res.url,
-        config: [fetchURL, requestConfig],
+        config: [
+          fetchURL,
+          {
+            ...requestConfig,
+            headers,
+          },
+        ],
         body,
       };
 
