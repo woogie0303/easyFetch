@@ -1,5 +1,5 @@
 {
-  "name": "@woogie0303/EasyFetch",
+  "name": "@woogie0303/easyfetch",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.cjs",
@@ -16,9 +16,20 @@
     "clean": "pnpm rimraf build/**/*",
     "prepublishOnly": "pnpm run test:run && pnpm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "fetch",
+    "EasyFetch",
+    "Nextjs",
+    "interceptor",
+    "headers",
+    "axios"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/woogie0303/easyFetch"
+  },
+  "author": "Dong Wook Kang",
+  "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",

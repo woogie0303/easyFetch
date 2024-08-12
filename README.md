@@ -9,7 +9,7 @@ React+Axios에 익숙해져 있는 상태에서 attraction 팀프로젝트에서
 - 400번 이상의 에러는 res.ok로 분기 처리
 - fetch에서는 사용할 수 없는 `axios.post`와 같은 API 메서드
 
-위와 같은 불편한 사항들을 해결하기 위해 Easyfetch는 Next App router에서 사용하는 확장된 fetch를 axios 사용자들이 좀 더 편리하게 사용하기 위해 만든 라이브러리 입니다. 또한 라이브러리에
+위와 같은 불편한 사항들을 해결하기 위해 Easyfetch는 Next App router에서 사용하는 확장된 fetch를 axios 사용자들이 좀 더 편리하게 사용하기 위해 만든 라이브러리 입니다.
 
 ## 설치
 
