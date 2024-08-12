@@ -1,16 +1,14 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
     "declaration": true,
     "target": "ESNext",
     "moduleResolution": "Node",
     "strict": true,
-    "outDir": "dist/",
     "noImplicitAny": true,
     "skipLibCheck": true
   },
-  "files": ["src/global.d.ts"],
-  "include": ["src/", "src/global.d.ts", "test/"],
+
+  "include": ["src/", "test/"],
   "exclude": ["dist/", "examples/"],
   "forceConsistentCasingInFileNames": true
 }

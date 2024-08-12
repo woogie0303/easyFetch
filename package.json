@@ -1,8 +1,9 @@
 {
-  "name": "kfetch",
+  "name": "@woogie0303/EasyFetch",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.cjs",
+  "types": "dist/types/index.d.ts",
   "scripts": {
     "prepare": "husky && husky install",
     "type-check": "tsc -p tsconfig.json --noEmit",
@@ -10,20 +11,27 @@
     "eslint": "eslint src/**/*",
     "lint": "pnpm run eslint & pnpm run type-check",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "build": "pnpm run clean && rollup -c",
+    "clean": "pnpm rimraf build/**/*",
+    "prepublishOnly": "pnpm run test:run && pnpm run build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
     "@typescript-eslint/parser": "^7.17.0",
     "eslint": "8.57.0",
-    "husky": "^8.0.0",
+    "husky": "^9.1.1",
     "lint-staged": "^15.2.7",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.20.0",
+    "tslib": "^2.6.3",
+    "typescript": "^5.5.4",
     "vitest": "^2.0.4"
-  },
-  "dependencies": {
-    "husky": "^9.1.1"
   }
 }
