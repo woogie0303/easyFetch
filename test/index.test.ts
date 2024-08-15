@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { METHOD_WITH_BODY, METHOD_WITHOUT_BODY } from '../src/constant';
 import { easyFetch } from '../src/createInstance';
-import RequestUtils from '../src/RequestUtils';
-import { EasyFetchResponse } from '../src/types/response.type';
+import { EasyFetchResponse } from '../src/types/easyFetch.type';
 
 describe('EasyFetch', () => {
   const globalFetch = fetch;
@@ -24,7 +23,6 @@ describe('EasyFetch', () => {
     const response = new Response(JSON.stringify({ attraction: 'main' }), {
       status: 200,
     });
-    const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
 
     fetchMocked.mockResolvedValue(response);
@@ -40,18 +38,21 @@ describe('EasyFetch', () => {
     });
 
     // then
+    const fetchMockedArg = fetchMocked.mock.calls[0][1];
+
     const expectRequestInstance = new Request('http://sdf', {
       mode: 'cors',
       cache: 'no-cache',
       method: 'POST',
       referrerPolicy: 'no-referrer',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
-    const actualRequestValue = await spyMergeRequestConfig.mock.results[0]
-      .value;
 
     const requestBody = await expectRequestInstance.arrayBuffer();
 
-    expect(actualRequestValue[1]).toStrictEqual({
+    expect(fetchMockedArg).toStrictEqual({
       body: requestBody,
       cache: expectRequestInstance.cache,
       credentials: expectRequestInstance.credentials,
@@ -70,54 +71,8 @@ describe('EasyFetch', () => {
     });
   });
 
-  it('merges requestInstance when requestInit with a next property is passed as an argument', async () => {
-    // given
-    const response = new Response(JSON.stringify({ attraction: 'main' }), {
-      status: 200,
-    });
-    const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
-    const easy = easyFetch();
-
-    fetchMocked.mockResolvedValue(response);
-
-    // when
-    const request = new Request('http://sdf', {
-      mode: 'cors',
-      cache: 'no-cache',
-    });
-    await easy.request(request, {
-      next: { revalidate: 300 },
-    });
-
-    // then
-    const expectRequestInstance = new Request('http://sd', {
-      cache: 'no-cache',
-    });
-
-    const actualRequestValue = await spyMergeRequestConfig.mock.results[0]
-      .value;
-
-    expect(actualRequestValue[1]).toStrictEqual({
-      cache: expectRequestInstance.cache,
-      credentials: expectRequestInstance.credentials,
-      headers: expectRequestInstance.headers,
-      integrity: expectRequestInstance.integrity,
-      keepalive: expectRequestInstance.keepalive,
-      method: expectRequestInstance.method,
-      mode: expectRequestInstance.mode,
-      priority: undefined,
-      referrer: expectRequestInstance.referrer,
-      redirect: expectRequestInstance.redirect,
-      referrerPolicy: expectRequestInstance.referrerPolicy,
-      signal: expectRequestInstance.signal,
-      window: undefined,
-      next: { revalidate: 300 },
-    });
-  });
-
   it('get and delete method does not have body', async () => {
     // given
-    const spyMergeRequestConfig = vi.spyOn(RequestUtils, 'mergeRequestConfig');
     const easy = easyFetch();
     const request = new Request('http://sdf', {
       mode: 'cors',
@@ -150,14 +105,15 @@ describe('EasyFetch', () => {
     });
 
     // then
-    const getMethodReturn = await spyMergeRequestConfig.mock.results[0].value;
-    const deleteMethodReturn = await spyMergeRequestConfig.mock.results[1]
-      .value;
-    const postMethodReturn = await spyMergeRequestConfig.mock.results[2].value;
+    const fetchMockedArg = fetchMocked.mock.calls;
 
-    expect(Object.keys(getMethodReturn[1]).includes('body')).toBe(false);
-    expect(Object.keys(deleteMethodReturn[1]).includes('body')).toBe(false);
-    expect(Object.keys(postMethodReturn[1]).includes('body')).toBe(true);
+    const getMethodReturn = fetchMockedArg[0][1];
+    const deleteMethodReturn = fetchMockedArg[1][1];
+    const postMethodReturn = fetchMockedArg[2][1];
+
+    expect(Object.keys(getMethodReturn).includes('body')).toBe(false);
+    expect(Object.keys(deleteMethodReturn).includes('body')).toBe(false);
+    expect(Object.keys(postMethodReturn).includes('body')).toBe(true);
   });
 
   it('Rest API method added the method property to the requestInit object', async () => {

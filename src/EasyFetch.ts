@@ -1,6 +1,5 @@
 import { EasyFetchDefaultConfig } from './createInstance';
 import Interceptor from './Interceptor';
-import RequestUtils from './RequestUtils';
 import type {
   EasyFetchRequestType,
   EasyFetchResponse,
@@ -8,6 +7,7 @@ import type {
 import { convertEasyFetchResponse } from './utils/convertEasyFetchResponse';
 import { hasEasyFetchResponse } from './utils/hasEasyFetchResponse';
 import { hasResponseBody } from './utils/hasResponseBody';
+import { mergeRequestConfig } from './utils/mergeRequestConfig';
 
 class EasyFetch {
   #baseUrl: EasyFetchRequestType[0] | undefined;
@@ -28,12 +28,12 @@ class EasyFetch {
     let requestConfig: EasyFetchRequestType[1];
 
     if (request instanceof Request) {
-      const [url, mergeRequestConfig] = await RequestUtils.mergeRequestConfig(
+      const [url, mergedRequestConfig] = await mergeRequestConfig(
         request,
         requestInit
       );
       fetchURL = url;
-      requestConfig = mergeRequestConfig;
+      requestConfig = mergedRequestConfig;
     } else {
       fetchURL = request;
       requestConfig = requestInit;
