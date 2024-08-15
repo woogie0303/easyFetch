@@ -1,11 +1,13 @@
 import { EasyFetchDefaultConfig } from './createInstance';
 import Interceptor from './Interceptor';
-import { hasEasyFetchResponse } from './libs/hasEasyFetchResponse';
 import RequestUtils from './RequestUtils';
 import type {
   EasyFetchRequestType,
   EasyFetchResponse,
 } from './types/easyFetch.type';
+import { convertEasyFetchResponse } from './utils/convertEasyFetchResponse';
+import { hasEasyFetchResponse } from './utils/hasEasyFetchResponse';
+import { hasResponseBody } from './utils/hasResponseBody';
 
 class EasyFetch {
   #baseUrl: EasyFetchRequestType[0] | undefined;
@@ -79,35 +81,23 @@ class EasyFetch {
         headers,
       });
 
-      const body = (await res.json()) as T;
+      const easyFetchResponse = await convertEasyFetchResponse<T>(res, {
+        ...requestConfig,
+        headers,
+      });
 
-      const response: EasyFetchResponse<T> = {
-        headers: res.headers,
-        ok: res.ok,
-        redirected: res.redirected,
-        status: res.status,
-        statusText: res.statusText,
-        type: res.type,
-        url: res.url,
-        config: [
-          fetchURL,
-          {
-            ...requestConfig,
-            headers,
-          },
-        ],
-        body,
-      };
-
-      if (!res.ok || (res.status < 500 && res.status >= 400)) {
+      if (
+        !res.ok ||
+        (res.status < 500 && res.status >= 400) ||
+        !hasResponseBody(easyFetchResponse)
+      ) {
         throw new Error(`${res.status} Error`, {
-          cause: response,
+          cause: easyFetchResponse,
         });
       }
 
-      return Promise.resolve(response);
+      return Promise.resolve(easyFetchResponse);
     } catch (err) {
-      // TODO: Test 코드 작성
       if (err instanceof Error && hasEasyFetchResponse(err.cause)) {
         return Promise.reject(err.cause);
       } else {

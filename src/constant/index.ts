@@ -13,5 +13,11 @@ const REQUEST_INIT_KEYS = [
   'referrerPolicy',
   'signal',
 ] as const;
+const RESPONSE_BODY_UNDEFINED_MESSAGE = 'Unexpected end of JSON input';
 
-export { METHOD_WITHOUT_BODY, METHOD_WITH_BODY, REQUEST_INIT_KEYS };
+export {
+  METHOD_WITHOUT_BODY,
+  METHOD_WITH_BODY,
+  REQUEST_INIT_KEYS,
+  RESPONSE_BODY_UNDEFINED_MESSAGE,
+};
