@@ -127,7 +127,7 @@ class EasyFetch {
 
       combinedDefaultHeaders = {
         ...requestConfig,
-        headers: defaultHeaders,
+        headers: requestConfigHeaders,
       };
     }
 
