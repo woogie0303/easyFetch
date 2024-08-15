@@ -24,21 +24,15 @@ class EasyFetch {
     request: RequestInfo | URL,
     requestInit?: EasyFetchRequestType[1]
   ) {
-    let fetchURL: EasyFetchRequestType[0];
-    let requestConfig: EasyFetchRequestType[1];
-
     if (request instanceof Request) {
       const [url, mergedRequestConfig] = await mergeRequestConfig(
         request,
         requestInit
       );
-      fetchURL = url;
-      requestConfig = mergedRequestConfig;
-    } else {
-      fetchURL = request;
-      requestConfig = requestInit;
+      return this.#request<T>(url, mergedRequestConfig);
     }
-    return this.#request<T>(fetchURL, requestConfig);
+
+    return this.#request<T>(request, requestInit);
   }
 
   async #request<T>(
