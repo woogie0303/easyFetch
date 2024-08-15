@@ -1,4 +1,4 @@
-import { EasyFetchResponse } from '../types/response.type';
+import { EasyFetchResponse } from '../types/easyFetch.type';
 
 const hasEasyFetchResponse = <T>(
   error: unknown

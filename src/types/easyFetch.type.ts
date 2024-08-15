@@ -5,9 +5,12 @@ type EasyFetchResponse<T> = Omit<
   keyof Body | 'clone'
 > & {
   body: T;
-  config: [string | URL, RequestInitWithNextConfig | undefined];
+  config: EasyFetchRequestType;
 };
 
-Response;
+type EasyFetchRequestType = [
+  string | URL,
+  RequestInitWithNextConfig | undefined
+];
 
-export { EasyFetchResponse };
+export { EasyFetchRequestType, EasyFetchResponse };

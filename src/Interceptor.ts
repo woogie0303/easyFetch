@@ -1,9 +1,11 @@
+import {
+  EasyFetchRequestType,
+  EasyFetchResponse,
+} from './types/easyFetch.type';
 import type {
   InterceptorArgs,
   InterceptorCallbackType,
 } from './types/interceptor.type';
-import { RequestInitWithNextConfig } from './types/nextProperty.type';
-import { EasyFetchResponse } from './types/response.type';
 
 class Interceptor {
   requestCbArr: InterceptorArgs<'request'>[];
@@ -21,9 +23,7 @@ class Interceptor {
     this.responseCbArr.push([onFulfilled, onRejected]);
   };
 
-  async flushRequestInterceptors(
-    initVal: Promise<[string | URL, RequestInitWithNextConfig | undefined]>
-  ) {
+  async flushRequestInterceptors(initVal: Promise<EasyFetchRequestType>) {
     const flushArr = this.requestCbArr;
 
     let promiseInit = initVal;

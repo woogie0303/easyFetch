@@ -1,12 +1,14 @@
 import { EasyFetchDefaultConfig } from './createInstance';
 import Interceptor from './Interceptor';
-import { hasEasyFetchResponse } from './libs/hasNextConfig';
+import { hasEasyFetchResponse } from './libs/hasEasyFetchResponse';
 import RequestUtils from './RequestUtils';
-import { RequestInitWithNextConfig } from './types/nextProperty.type';
-import type { EasyFetchResponse } from './types/response.type';
+import type {
+  EasyFetchRequestType,
+  EasyFetchResponse,
+} from './types/easyFetch.type';
 
 class EasyFetch {
-  #baseUrl: string | URL | undefined;
+  #baseUrl: EasyFetchRequestType[0] | undefined;
   #headers: HeadersInit | undefined;
   #interceptor: Interceptor;
 
@@ -18,10 +20,10 @@ class EasyFetch {
 
   async request<T>(
     request: RequestInfo | URL,
-    requestInit?: RequestInitWithNextConfig
+    requestInit?: EasyFetchRequestType[1]
   ) {
-    let fetchURL: string | URL;
-    let requestConfig: RequestInitWithNextConfig | undefined;
+    let fetchURL: EasyFetchRequestType[0];
+    let requestConfig: EasyFetchRequestType[1];
 
     if (request instanceof Request) {
       const [url, mergeRequestConfig] = await RequestUtils.mergeRequestConfig(
@@ -38,8 +40,8 @@ class EasyFetch {
   }
 
   async #request<T>(
-    fetchURL: string | URL,
-    requestConfig?: RequestInitWithNextConfig
+    fetchURL: EasyFetchRequestType[0],
+    requestConfig?: EasyFetchRequestType[1]
   ) {
     const combinedDefaultOptionWithFetchArgs = this.#combineDefaultOptions(
       fetchURL,
@@ -62,8 +64,8 @@ class EasyFetch {
   }
 
   async #dispatchFetch<T>(
-    fetchURL: string | URL,
-    requestConfig?: RequestInitWithNextConfig
+    fetchURL: EasyFetchRequestType[0],
+    requestConfig?: EasyFetchRequestType[1]
   ): Promise<EasyFetchResponse<T>> {
     const globalFetch = fetch;
     const headers = new Headers(requestConfig?.headers);
@@ -106,7 +108,7 @@ class EasyFetch {
       return Promise.resolve(response);
     } catch (err) {
       // TODO: Test 코드 작성
-      if (err instanceof Error && hasEasyFetchResponse(err)) {
+      if (err instanceof Error && hasEasyFetchResponse(err.cause)) {
         return Promise.reject(err.cause);
       } else {
         throw err;
@@ -115,11 +117,11 @@ class EasyFetch {
   }
 
   #combineDefaultOptions(
-    fetchURL: string | URL,
-    requestConfig: RequestInitWithNextConfig | undefined
-  ): [string | URL, RequestInitWithNextConfig | undefined] {
-    let combinedDefaultUrl: string | URL | undefined;
-    let combinedDefaultHeaders: RequestInitWithNextConfig | undefined;
+    fetchURL: EasyFetchRequestType[0],
+    requestConfig: EasyFetchRequestType[1]
+  ): EasyFetchRequestType {
+    let combinedDefaultUrl: EasyFetchRequestType[0] | undefined;
+    let combinedDefaultHeaders: EasyFetchRequestType[1];
 
     if (this.#baseUrl) {
       combinedDefaultUrl = new URL(fetchURL, this.#baseUrl);

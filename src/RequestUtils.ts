@@ -1,12 +1,12 @@
 import { METHOD_WITHOUT_BODY, REQUEST_INIT_KEYS } from './constant';
+import { EasyFetchRequestType } from './types/easyFetch.type';
 import { MethodWithoutBodyType } from './types/method.type';
-import { RequestInitWithNextConfig } from './types/nextProperty.type';
 
 class RequestUtils {
   static async #createMergedRequestInit(
     request: Request,
-    requestInit?: RequestInitWithNextConfig
-  ): Promise<RequestInitWithNextConfig> {
+    requestInit?: EasyFetchRequestType[1]
+  ): Promise<NonNullable<EasyFetchRequestType[1]>> {
     const mergedRequestConfig = new Request(request, requestInit);
     const isGetOrDeleteMethod = METHOD_WITHOUT_BODY.includes(
       mergedRequestConfig.method.toLowerCase() as MethodWithoutBodyType
@@ -20,17 +20,17 @@ class RequestUtils {
       isGetOrDeleteMethod
         ? {}
         : { body: await mergedRequestConfig.arrayBuffer() }
-    ) as RequestInit;
+    ) as NonNullable<EasyFetchRequestType[1]>;
 
     return newRequestInit;
   }
 
   static async mergeRequestConfig(
     request: Request,
-    requestInit?: RequestInitWithNextConfig
-  ): Promise<[string, RequestInitWithNextConfig | undefined]> {
+    requestInit?: EasyFetchRequestType[1]
+  ): Promise<[Exclude<EasyFetchRequestType[0], URL>, EasyFetchRequestType[1]]> {
     const fetchURL = request.url;
-    let requestConfig: RequestInitWithNextConfig | undefined;
+    let requestConfig: EasyFetchRequestType[1];
 
     if (requestInit) {
       const { next, priority, window, ...rest } = requestInit;
