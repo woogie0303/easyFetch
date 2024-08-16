@@ -11,7 +11,7 @@ type MethodFunction<T> = T extends MethodWithBodyType
   ? <P>(
       url: string | URL,
       reqBody?: object,
-      reqConfig?: Omit<RequestInitWithNextConfig, 'method'>
+      reqConfig?: Omit<RequestInitWithNextConfig, 'method' | 'body'>
     ) => Promise<EasyFetchResponse<P>>
   : <P>(
       url: string | URL,

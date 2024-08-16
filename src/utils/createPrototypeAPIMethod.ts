@@ -16,7 +16,7 @@ function createPrototypeAPIMethod(method: MethodType) {
       this: EasyFetch,
       url: string | URL,
       reqBody?: object,
-      reqConfig?: Omit<RequestInitWithNextConfig, 'method'>
+      reqConfig?: Omit<RequestInitWithNextConfig, 'method' | 'body'>
     ): Promise<EasyFetchResponse<T>> {
       const mergedRequestConfigWithBody: RequestInitWithNextConfig = {
         ...reqConfig,
