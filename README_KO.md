@@ -1,17 +1,17 @@
 ## EasyFetch
 
-#### [한국어 버전](./README_KO.md)
+#### [English Version](./README.md)
 
-While working on the attraction team project using the Next.js App Router, I encountered some inconveniences, especially being familiar with React and Axios. These issues include:
+React+Axios에 익숙해져 있는 상태에서 attraction 팀프로젝트에서 Next.js App router 사용하다보니 몇가지 불편함을 접했습니다.
 
-- Lack of interceptor functionality in client components.
-- Using res.json, JSON.stringify
-- Handling of errors above status 400 using res.ok.
-- Missing API methods like axios.post in the fetch API.
+- 클라이언트 컴포넌트에서 interceptor 기능의 부재
+- 직접 해야하는 직렬화, 역직렬화
+- 400번 이상의 에러는 res.ok로 분기 처리
+- fetch에서는 사용할 수 없는 `axios.post`와 같은 API 메서드
 
-To address these inconveniences, EasyFetch was created as an extended fetch for Next.js App Router, making it more user-friendly for those accustomed to Axios.
+위와 같은 불편한 사항들을 해결하기 위해 Easyfetch는 Next App router에서 사용하는 확장된 fetch를 axios 사용자들이 좀 더 편리하게 사용하기 위해 만든 라이브러리 입니다.
 
-## Install
+## 설치
 
 ```
 pnpm add @woogie0303/easyfetch
@@ -25,7 +25,7 @@ yarn add @woogie0303/easyfetch
 npm install @woogie0303/easyfetch
 ```
 
-## Type
+## 타입
 
 ### RequestInitWithNextConfig
 
@@ -61,9 +61,9 @@ type EasyFetchRequestType = [
 ];
 ```
 
-## Feature
+## 특징
 
-### You can set default headers and baseUrl.
+### header와 baseUrl을 설정 할 수 있습니다.
 
 #### easyFetch()
 
@@ -80,7 +80,7 @@ defaultConfig?: {
 }
 ```
 
-### Use API methods and you can set Request instances as argument.
+### api method 및 기존 fetch 인자인 Request 인스턴스를 사용할 수 있습니다.
 
 ```ts
 const easy = easyFetch({
@@ -130,7 +130,7 @@ easy.put('postUser', { userData: 'kang' });
 
 ### Request Interceptor
 
-This feature allows you to add custom logic before a request is sent.
+요청을 보내기 전에 Fetch 인자와 관련해서 설정할 것이 있으면 추가할 수 있는 기능입니다.
 
 ```ts
 const easy = easyFetch();
@@ -151,7 +151,7 @@ easy.interceptor.request(onFulfilled, onReject);
 
 ### Response Interceptor
 
-You can configure logic to handle responses before they are processed. For handling 400-level errors, use the EasyFetchResponse type assertion to handle server errors.
+응답을 받기전에 처리해야할 로직을 설정할 수 있습니다. 400번대 에러를 처리할때는 EasyFetchResponse 타입 단언을 사용해서 서버 에러를 핸들링 할 수 있습니다.
 
 ```ts
 const easy = easyFetch();
@@ -170,7 +170,7 @@ easy.interceptor.response(onFulfilled, onReject);
  ): void
 ```
 
-#### Handling 400-level Server Errors
+#### 400대 서버 에러처리
 
 ```ts
 const easy = easyFetch();
@@ -202,12 +202,12 @@ easy.interceptor.response(
 );
 ```
 
-## Note
+## 주의
 
-When handling errors, note that the Interceptor Response feature is not the same as transforming the response data. Returning an error config url as an argument helps maintain type consistency.
+에러를 핸들링할 때 Interceptor Response기능은 response의 형태를 바꿔주는 transform response와 다른 기능입니다. error config url을 인자로 해서 반환해주는 것이 타입의 일관성을 줄 수 있습니다.
 
 ```ts
-// Incorrect usage
+// 잘못된 사용 예시
 const easy = easyFetch();
 easy.interceptor.response(
   (res) => res,
@@ -220,7 +220,7 @@ easy.interceptor.response(
 
 const data = await easy.get<ResponseType>('https://sdf'); // return {data: 'Hi'}
 
-// Correct usage
+// 올바른 사용 예시
 const easy = easyFetch();
 easy.interceptor.response(
   (res) => res,
@@ -235,6 +235,6 @@ easy.interceptor.response(
 const data = easy.get<ResponseType>('https://sdf'); // return ResponseType Data
 ```
 
-## License
+## 라이센스
 
 MIT © [DongWook Kang](https://github.com/woogie0303)
