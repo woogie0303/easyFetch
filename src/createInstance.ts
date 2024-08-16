@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { METHOD_WITH_BODY, METHOD_WITHOUT_BODY } from './constant';
 import EasyFetch from './EasyFetch';
-import { EasyFetchResponse } from './types/easyFetch.type';
 import type { EasyFetchWithAPIMethodsType } from './types/method.type';
-import { RequestInitWithNextConfig } from './types/nextProperty.type';
+import createPrototypeAPIMethod from './utils/createPrototypeAPIMethod';
 
 export interface EasyFetchDefaultConfig {
   baseUrl?: string | URL;
@@ -15,40 +14,9 @@ const mergeEasyFetchWithAPIMethod = (
 ) => {
   const instance = new EasyFetch(defaultConfig);
 
-  METHOD_WITHOUT_BODY.forEach((method) => {
-    async function prototypeAPIMethodWithoutData<T>(
-      this: EasyFetch,
-      url: string | URL,
-      reqConfig?: RequestInitWithNextConfig
-    ): Promise<EasyFetchResponse<T>> {
-      return this.request<T>(url, {
-        ...reqConfig,
-        method: method.toUpperCase(),
-      });
-    }
-
+  [...METHOD_WITH_BODY, ...METHOD_WITHOUT_BODY].forEach((method) => {
     (EasyFetch.prototype as EasyFetchWithAPIMethodsType)[method] =
-      prototypeAPIMethodWithoutData;
-  });
-
-  METHOD_WITH_BODY.forEach((method) => {
-    async function prototypeAPIMethodWithData<T>(
-      this: EasyFetch,
-      url: string | URL,
-      reqBody?: object,
-      reqConfig?: Omit<RequestInitWithNextConfig, 'method'>
-    ): Promise<EasyFetchResponse<T>> {
-      const mergedRequestConfigWithBody: RequestInitWithNextConfig = {
-        ...reqConfig,
-        body: reqBody && JSON.stringify(reqBody),
-        method: method.toUpperCase(),
-      };
-
-      return this.request<T>(url, mergedRequestConfigWithBody);
-    }
-
-    (EasyFetch.prototype as EasyFetchWithAPIMethodsType)[method] =
-      prototypeAPIMethodWithData;
+      createPrototypeAPIMethod(method);
   });
 
   return instance as EasyFetchWithAPIMethodsType;
