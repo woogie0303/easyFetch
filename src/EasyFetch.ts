@@ -75,10 +75,13 @@ class EasyFetch {
         headers,
       });
 
-      const easyFetchResponse = await convertEasyFetchResponse<T>(res, {
-        ...requestConfig,
-        headers,
-      });
+      const easyFetchResponse = await convertEasyFetchResponse<T>(res, [
+        fetchURL,
+        {
+          ...requestConfig,
+          headers,
+        },
+      ]);
 
       if (
         !res.ok ||

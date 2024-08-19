@@ -1,9 +1,12 @@
 import { RESPONSE_BODY_UNDEFINED_MESSAGE } from '../constant';
-import { EasyFetchResponse } from '../types/easyFetch.type';
+import {
+  EasyFetchRequestType,
+  EasyFetchResponse,
+} from '../types/easyFetch.type';
 
 export const convertEasyFetchResponse = async <T>(
   res: Response,
-  reqConfig: RequestInit
+  reqConfig: EasyFetchRequestType
 ): Promise<EasyFetchResponse<T> | EasyFetchResponse<undefined>> => {
   const responseWithoutBody: Omit<EasyFetchResponse<T>, 'body'> = {
     headers: res.headers,
@@ -12,11 +15,10 @@ export const convertEasyFetchResponse = async <T>(
     status: res.status,
     statusText: res.statusText,
     type: res.type,
-    url: res.url,
     config: [
-      res.url,
+      reqConfig[0],
       {
-        ...reqConfig,
+        ...reqConfig[1],
       },
     ],
   };
