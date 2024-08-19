@@ -5,7 +5,7 @@
 React+Axios에 익숙해져 있는 상태에서 attraction 팀프로젝트에서 Next.js App router 사용하다보니 몇가지 불편함을 접했습니다.
 
 - 클라이언트 컴포넌트에서 interceptor 기능의 부재
-- 직접 해야하는 직렬화, 역직렬화
+- res.json(), JSON.stringify을 매번 사용하는 것
 - 400번 이상의 에러는 res.ok로 분기 처리
 - fetch에서는 사용할 수 없는 `axios.post`와 같은 API 메서드
 
@@ -45,7 +45,7 @@ interface RequestInitWithNextConfig extends globalThis.RequestInit {
 ```ts
 type EasyFetchResponse<T> = Omit<
   Awaited<ReturnType<typeof fetch>>,
-  keyof Body | 'clone'
+  keyof Body | 'clone' | 'url'
 > & {
   body: T;
   config: [string | URL, RequestInit | RequestInitWithNextConfig | undefined];
@@ -178,26 +178,24 @@ const easy = easyFetch();
 easy.interceptor.response(
   (res) => res,
   async (err) => {
-    const serverError = err as EasyFetchResponse<{ data: 1 }>;
+    const error = err as EasyFetchResponse<ErrorType>;
 
-    if (serverError.status === 401) {
-      const [url, resConfig] = serverError.config;
-      const refreshToken = await easy
-        .get<RefreshTokenType>('https://getRefresh', { ...resConfig })
-        .then(
-          (res) => res,
-          (err) => {
-            throw err;
-          }
-        );
+    if (error.status === 401) {
+      const { body } = await easy.get<Token>('https://google.co/getToken', {
+        ...error.config[1],
+      });
 
-      const headers = new Headers(resConfig?.headers);
-      headers.set('Authorization', `Berarer ${refreshToken.data}`);
+      const headers = new Headers(error.config[1]?.headers);
 
-      return easy.get(url, { ...resConfig, headers });
+      headers.set('Authorization', `Bearer ${body.accessToken}`);
+
+      return easy.request(error.config[0], {
+        ...error.config[1],
+        headers,
+      });
     }
 
-    return Promise.reject(err);
+    throw err;
   }
 );
 ```

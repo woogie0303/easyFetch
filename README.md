@@ -45,7 +45,7 @@ interface RequestInitWithNextConfig extends globalThis.RequestInit {
 ```ts
 type EasyFetchResponse<T> = Omit<
   Awaited<ReturnType<typeof fetch>>,
-  keyof Body | 'clone'
+  keyof Body | 'clone' | 'url'
 > & {
   body: T;
   config: [string | URL, RequestInit | RequestInitWithNextConfig | undefined];
@@ -178,26 +178,24 @@ const easy = easyFetch();
 easy.interceptor.response(
   (res) => res,
   async (err) => {
-    const serverError = err as EasyFetchResponse<{ data: 1 }>;
+    const error = err as EasyFetchResponse<ErrorType>;
 
-    if (serverError.status === 401) {
-      const [url, resConfig] = serverError.config;
-      const refreshToken = await easy
-        .get<RefreshTokenType>('https://getRefresh', { ...resConfig })
-        .then(
-          (res) => res,
-          (err) => {
-            throw err;
-          }
-        );
+    if (error.status === 401) {
+      const { body } = await easy.get<Token>('https://google.co/getToken', {
+        ...error.config[1],
+      });
 
-      const headers = new Headers(resConfig?.headers);
-      headers.set('Authorization', `Berarer ${refreshToken.data}`);
+      const headers = new Headers(error.config[1]?.headers);
 
-      return easy.get(url, { ...resConfig, headers });
+      headers.set('Authorization', `Bearer ${body.accessToken}`);
+
+      return easy.request(error.config[0], {
+        ...error.config[1],
+        headers,
+      });
     }
 
-    return Promise.reject(err);
+    throw err;
   }
 );
 ```
