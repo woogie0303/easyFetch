@@ -290,4 +290,69 @@ describe('EasyFetch', () => {
 
     expect(requestHeaders).toStrictEqual(expectValue);
   });
+
+  it('interceptor response value when response status is 401', async () => {
+    // given
+    type Token = {
+      refreshToken: string;
+      accessToken: string;
+    };
+    type ErrorType = {
+      message: string;
+    };
+
+    const easy = easyFetch();
+    easy.interceptor.response(
+      (res) => res,
+      async (err) => {
+        const error = err as EasyFetchResponse<ErrorType>;
+
+        if (error.status === 401) {
+          const { body } = await easy.get<Token>('https://google.co/getToken', {
+            ...error.config[1],
+          });
+
+          const headers = new Headers(error.config[1]?.headers);
+
+          headers.set('Authorization', `Bearer ${body.accessToken}`);
+
+          return easy.request(error.config[0], {
+            ...error.config[1],
+            headers,
+          });
+        }
+
+        throw err;
+      }
+    );
+
+    // when
+    fetchMocked.mockResolvedValueOnce(
+      new Response(JSON.stringify({ message: 'error is define' }), {
+        status: 401,
+      })
+    );
+    fetchMocked.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ refreshToken: '123124', accessToken: '1252923' }),
+        {
+          status: 200,
+        }
+      )
+    );
+    fetchMocked.mockResolvedValueOnce(
+      new Response(JSON.stringify({ message: 'success' }), {
+        status: 200,
+      })
+    );
+
+    const { config } = await easy.get('https://attraction.com', {
+      credentials: 'include',
+    });
+
+    // then
+    const headers = new Headers(config[1]?.headers);
+
+    expect(headers.get('Authorization')).equal('Bearer 1252923');
+  });
 });
