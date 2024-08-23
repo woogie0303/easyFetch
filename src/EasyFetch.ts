@@ -49,9 +49,7 @@ class EasyFetch {
         Promise.resolve(combinedDefaultOptionWithFetchArgs)
       );
 
-    //TODO: response값이 같지 않으면 에러발생 왜냐하면 transform result가 아니기 때문에
-
-    return this.#interceptor.flushResPonseInterceptors(
+    return this.#interceptor.flushResponseInterceptors(
       this.#dispatchFetch<T>(
         applyInterceptorRequest[0],
         applyInterceptorRequest[1]

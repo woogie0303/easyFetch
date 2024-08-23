@@ -1,19 +1,10 @@
-import { EasyFetchRequestType, EasyFetchResponse } from './easyFetch.type';
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-interface InterceptorCallbackType<T extends 'request' | 'response'> {
+interface InterceptorCallbackType<T> {
   (
-    onFulfilled?: (
-      arg: T extends 'request' ? EasyFetchRequestType : EasyFetchResponse<any>
-    ) => T extends 'request'
-      ? Promise<EasyFetchRequestType> | EasyFetchRequestType
-      : Promise<EasyFetchResponse<any>> | EasyFetchResponse<any>,
+    onFulfilled?: (arg: T) => T | Promise<T>,
     onRejected?: (err: any) => any
   ): void;
 }
-
-type InterceptorArgs<T extends 'request' | 'response'> = Parameters<
-  InterceptorCallbackType<T>
->;
+type InterceptorArgs<T> = Parameters<InterceptorCallbackType<T>>;
 
 export { InterceptorArgs, InterceptorCallbackType };

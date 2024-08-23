@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   EasyFetchRequestType,
   EasyFetchResponse,
@@ -8,44 +9,43 @@ import type {
 } from './types/interceptor.type';
 
 class Interceptor {
-  requestCbArr: InterceptorArgs<'request'>[];
-  responseCbArr: InterceptorArgs<'response'>[];
+  requestCbArr: InterceptorArgs<EasyFetchRequestType>[];
+  responseCbArr: InterceptorArgs<any>[];
 
   constructor() {
     this.requestCbArr = [];
     this.responseCbArr = [];
   }
-  request: InterceptorCallbackType<'request'> = (onFulfilled, onRejected) => {
+  request: InterceptorCallbackType<EasyFetchRequestType> = (
+    onFulfilled,
+    onRejected
+  ) => {
     this.requestCbArr.unshift([onFulfilled, onRejected]);
   };
 
-  response: InterceptorCallbackType<'response'> = (onFulfilled, onRejected) => {
+  response: InterceptorCallbackType<any> = (onFulfilled, onRejected) => {
     this.responseCbArr.push([onFulfilled, onRejected]);
   };
 
-  async flushRequestInterceptors(initVal: Promise<EasyFetchRequestType>) {
-    const flushArr = this.requestCbArr;
-
+  flushInterceptors<T>(
+    initVal: Promise<T>,
+    interceptors: InterceptorArgs<T>[]
+  ) {
     let promiseInit = initVal;
 
-    for (let i = 0; i < flushArr.length; i++) {
-      promiseInit = promiseInit.then(...flushArr[i]);
+    for (let i = 0; i < interceptors.length; i++) {
+      promiseInit = promiseInit.then(...interceptors[i]);
     }
 
     return promiseInit;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async flushResPonseInterceptors(initVal: Promise<EasyFetchResponse<any>>) {
-    const flushArr = this.responseCbArr;
+  flushRequestInterceptors(initVal: Promise<EasyFetchRequestType>) {
+    return this.flushInterceptors(initVal, this.requestCbArr);
+  }
 
-    let promiseInit = initVal;
-
-    for (let i = 0; i < flushArr.length; i++) {
-      promiseInit = promiseInit.then(...flushArr[i]);
-    }
-
-    return promiseInit;
+  flushResponseInterceptors(initVal: Promise<EasyFetchResponse<any>>) {
+    return this.flushInterceptors(initVal, this.responseCbArr);
   }
 }
 
