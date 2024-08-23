@@ -1,4 +1,3 @@
-import { nodeResolve } from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import del from 'rollup-plugin-delete';
@@ -12,7 +11,6 @@ export default [
       format: 'cjs',
     },
     plugins: [
-      nodeResolve({ extensions: ['.js', '.ts'] }),
       typescript({
         exclude: ['test', '**/*.test.ts'],
         declaration: true,
@@ -22,7 +20,7 @@ export default [
     ],
   },
   {
-    input: 'dist/cjs/types/index.d.ts',
+    input: 'src/index.ts',
     output: {
       file: 'dist/cjs/index.d.ts',
       format: 'cjs',
@@ -37,7 +35,6 @@ export default [
     },
 
     plugins: [
-      nodeResolve({ extensions: ['.js', '.ts'] }),
       typescript({
         exclude: ['test', '**/*.test.ts'],
         declaration: true,
@@ -47,7 +44,7 @@ export default [
     ],
   },
   {
-    input: 'dist/esm/types/index.d.ts',
+    input: 'src/index.ts',
     output: {
       file: 'dist/esm/index.d.mts',
       format: 'esm',
